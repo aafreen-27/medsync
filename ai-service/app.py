@@ -1,0 +1,35 @@
+from flask import Flask, jsonify
+from flask_cors import CORS
+from pso import run_pso_optimization
+import json
+
+app = Flask(__name__)
+CORS(app)
+
+@app.route('/health', methods=['GET'])
+def health():
+    return jsonify({"status": "ok", "message": "AI Microservice for PSO is running"})
+
+@app.route('/optimize-schedule', methods=['POST'])
+def optimize_schedule():
+    '''
+    Endpoint to trigger Particle Swarm Optimization for shift scheduling.
+    Expects data such as staff vectors, workload parameters.
+    '''
+    try:
+        # Mocking input data for algorithm
+        num_staff = 50
+        num_shifts = 3
+        # Run optimization
+        optimal_schedule = run_pso_optimization(num_staff, num_shifts)
+        
+        return jsonify({
+            "status": "success",
+            "message": "PSO Schedule Generated",
+            "data": optimal_schedule
+        })
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(port=5001, debug=True)
