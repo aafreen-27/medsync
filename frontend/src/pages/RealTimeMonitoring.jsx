@@ -131,11 +131,11 @@ const RealTimeMonitoring = () => {
         {[
           { title: 'Total Staff On Duty', value: totalStaff, color: '#2196f3' },
           { title: 'Total Patients', value: totalPatients, color: '#9c27b0' },
-          { title: 'Avg Staff Ratio', value: \`1:\${avgRatio}\`, color: '#00bcd4' },
+          { title: 'Avg Staff Ratio', value: `1:${avgRatio}`, color: '#00bcd4' },
           { title: 'Overloaded Wards', value: overloadedCount, color: '#f44336' }
         ].map((kpi, idx) => (
           <Grid item xs={12} sm={6} md={3} key={idx}>
-            <Card sx={{ borderLeft: \`5px solid \${kpi.color}\`, boxShadow: 2 }}>
+            <Card sx={{ borderLeft: `5px solid ${kpi.color}`, boxShadow: 2 }}>
               <CardContent>
                 <Typography color="textSecondary" gutterBottom>{kpi.title}</Typography>
                 <Typography variant="h4" component="div" fontWeight="bold">{kpi.value}</Typography>
@@ -160,12 +160,12 @@ const RealTimeMonitoring = () => {
                       p: 1.5,
                       borderRadius: 2, 
                       backgroundColor: style.bg,
-                      borderLeft: \`4px solid \${style.border}\`,
+                      borderLeft: `4px solid ${style.border}`,
                       position: 'relative',
                       transition: 'background 0.8s',
                       cursor: 'pointer',
                       '&:hover': { boxShadow: 3 }
-                    }} title={\`\${ward.name} — Ratio: 1:\${(ward.patients/ward.staff).toFixed(1)} \${status==='overloaded'?'⚠':''}\`}>
+                    }} title={`${ward.name} — Ratio: 1:${(ward.patients/ward.staff).toFixed(1)} ${status==='overloaded'?'⚠':''}`}>
                       <Chip label={style.label} sx={{ position: 'absolute', top: 8, right: 8, bgcolor: style.border, color: 'white', fontWeight: 'bold', fontSize: '0.6rem', height: 20 }} />
                       <Typography fontWeight="bold" noWrap color={style.color} pr={7}>{ward.name}</Typography>
                       <Box mt={1.5}>
@@ -227,7 +227,7 @@ const RealTimeMonitoring = () => {
           <Paper sx={{ p: 2, height: '100%', borderRadius: 3, maxHeight: 800, overflowY: 'auto' }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
               <Typography variant="h6" fontWeight="bold">Live Alert Feed</Typography>
-              <Chip label={\`\${newAlertCount} New\`} color="error" size="small" onClick={() => setNewAlertCount(0)} sx={{ cursor: 'pointer' }} />
+              <Chip label={`${newAlertCount} New`} color="error" size="small" onClick={() => setNewAlertCount(0)} sx={{ cursor: 'pointer' }} />
             </Box>
             <Divider sx={{ mb: 2 }} />
             {alerts.map((alert, idx) => (
