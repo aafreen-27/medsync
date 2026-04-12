@@ -28,8 +28,9 @@ const RealTimeMonitoring = () => {
   ]);
 
   useEffect(() => {
-    // Connect to websocket backend
-    const socket = io('http://localhost:5000');
+    // Connect to websocket backend (fallback to same domain or env var for production)
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+    const socket = io(backendUrl);
     
     socket.on('heatmap-update', (data) => {
       setWards(data);
