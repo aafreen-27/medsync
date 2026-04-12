@@ -30,13 +30,48 @@ const staffList = [
   { id: 'EMP012', name: 'Dr. Meena Krishnan', role: 'Doctor', onLeave: false }
 ];
 
-const initialAllShifts = {
-  "2026-04-07": { "Ward 1": { staffId: "EMP004", shift: "Morning" }, "Ward 2": { staffId: "EMP002", shift: "Evening" }, "Ward 4": { staffId: "EMP001", shift: "Morning" }, "Ward 6": { staffId: "EMP003", shift: "Night" }, "Ward 7": { staffId: "EMP009", shift: "Morning" }, "Ward 10": { staffId: "EMP007", shift: "Morning" } },
-  "2026-04-08": { "Ward 3": { staffId: "EMP005", shift: "Morning" }, "Ward 5": { staffId: "EMP006", shift: "Evening" }, "Ward 7": { staffId: "EMP009", shift: "Morning" }, "Ward 9": { staffId: "EMP012", shift: "Evening" } },
-  "2026-04-09": { "Ward 1": { staffId: "EMP010", shift: "Evening" }, "Ward 4": { staffId: "EMP011", shift: "Morning" }, "Ward 6": { staffId: "EMP003", shift: "Night" }, "Ward 8": { staffId: "EMP008", shift: "Night" } },
-  "2026-04-10": { "Ward 2": { staffId: "EMP002", shift: "Evening" }, "Ward 5": { staffId: "EMP006", shift: "Evening" }, "Ward 7": { staffId: "EMP009", shift: "Morning" }, "Ward 9": { staffId: "EMP012", shift: "Evening" } },
-  "2026-04-11": { "Ward 1": { staffId: "EMP004", shift: "Morning" }, "Ward 3": { staffId: "EMP005", shift: "Morning" }, "Ward 4": { staffId: "EMP001", shift: "Morning" }, "Ward 8": { staffId: "EMP008", shift: "Night" }, "Ward 10": { staffId: "EMP007", shift: "Morning" } },
-  "2026-04-12": { "Ward 2": { staffId: "EMP008", shift: "Night" }, "Ward 9": { staffId: "EMP012", shift: "Evening" } },
+const generateWeekData = (mondayDate) => {
+  const weekNum = Math.floor(mondayDate.getTime() / (7 * 24 * 60 * 60 * 1000));
+  const result = {};
+  
+  for (let d = 0; d < 7; d++) {
+    const date = new Date(mondayDate);
+    date.setDate(mondayDate.getDate() + d);
+    const dateKey = date.toISOString().split('T')[0];
+    result[dateKey] = {};
+
+    const wardsToday = wards.filter((_, i) => (i + d + weekNum) % 2 === 0);
+
+    wardsToday.forEach((ward, i) => {
+      const empIndex = (i + d + weekNum) % staffList.length;
+      const emp = staffList[empIndex];
+      if (emp.onLeave) return;
+
+      const shiftType = ['Morning', 'Evening', 'Night'][empIndex % 3];
+
+      result[dateKey][ward] = {
+        staffId: emp.id,
+        shift: shiftType,
+      };
+    });
+  }
+  return result;
+};
+
+const initializeAllShifts = () => {
+  const shifts = {};
+  // Center on Apr 7 2026 week to preserve existing mock timeframe experience, 
+  // or use current date. Since the mock uses "2026-04-07", we use that.
+  const currentMonday = getMonday(new Date('2026-04-07'));
+  
+  for (let w = -4; w <= 4; w++) {
+    const weekMonday = new Date(currentMonday);
+    weekMonday.setDate(currentMonday.getDate() + w * 7);
+    const weekData = generateWeekData(weekMonday);
+    Object.assign(shifts, weekData);
+  }
+  
+  return shifts;
 };
 
 // Auto Schedule Payload Mapper
@@ -68,7 +103,7 @@ const RoleStyles = { Doctor: { c: '#0d47a1', bg: '#e3f2fd' }, Nurse: { c: '#0069
 const ShiftStyles = { Morning: { c: '#1a7fcf', bg: '#e6f1fb' }, Evening: { c: '#f59e0b', bg: '#fef9e7' }, Night: { c: '#4b5563', bg: '#f1f2f5' } };
 
 const ShiftScheduler = () => {
-  const [allShifts, setAllShifts] = useState(initialAllShifts);
+  const [allShifts, setAllShifts] = useState(initializeAllShifts);
   const [weekStart, setWeekStart] = useState(getMonday(new Date('2026-04-07')));
   const [lastSaved, setLastSaved] = useState('Never');
   
@@ -100,6 +135,21 @@ const ShiftScheduler = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [openModal, openPso, openRemove]);
+
+  useEffect(() => {
+    const dateKey = weekStart.toISOString().split('T')[0];
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    const endKey = weekEnd.toISOString().split('T')[0];
+    
+    // Check if we have data for the start or end of this week
+    const hasData = Object.keys(allShifts).some(k => k >= dateKey && k <= endKey);
+    
+    if (!hasData) {
+      const newWeekData = generateWeekData(weekStart);
+      setAllShifts(prev => ({ ...prev, ...newWeekData }));
+    }
+  }, [weekStart]);
 
   // Derived Logic
   const weekEnd = new Date(weekStart);
