@@ -1,8 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from pso import run_pso_optimization
-import json
-
 app = Flask(__name__)
 CORS(app)
 
@@ -12,22 +10,17 @@ def health():
 
 @app.route('/optimize-schedule', methods=['POST'])
 def optimize_schedule():
-    '''
-    Endpoint to trigger Particle Swarm Optimization for shift scheduling.
-    Expects data such as staff vectors, workload parameters.
-    '''
     try:
-        data = request.get_json() or {}
-        num_staff = data.get('num_staff', data.get('num_employees', 50))
-        num_shifts = data.get('num_shifts', 3)
+        data = request.get_json()
+        num_staff = data.get('num_staff', 12) if data else 12
+        num_shifts = data.get('num_shifts', 3) if data else 3
         
-        # Run optimization
         optimal_schedule = run_pso_optimization(num_staff, num_shifts)
         
         return jsonify({
             "status": "success",
             "message": "PSO Schedule Generated",
-            "data": optimal_schedule
+            "schedules": optimal_schedule
         })
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500

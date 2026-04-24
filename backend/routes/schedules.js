@@ -17,14 +17,11 @@ router.get('/', async (req, res) => {
 // POST generate schedule dummy endpoint for PSO trigger
 router.post('/generate', async (req, res) => {
   try {
-    const employees = await Employee.find();
-    const numEmployees = employees.length || 0;
-
-    const response = await fetch('http://localhost:5001/optimize-schedule', {
+    const response = await fetch('http://127.0.0.1:5001/optimize-schedule', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        num_employees: numEmployees,
+        num_staff: 12,
         num_shifts: 3
       })
     });
@@ -35,13 +32,10 @@ router.post('/generate', async (req, res) => {
 
     const data = await response.json();
 
-    res.json({
-      message: 'Optimal schedule generated successfully using AI rules.',
-      schedules: data.data || []
-    });
+    res.json(data);
   } catch (err) {
     console.error('Error generating schedule:', err);
-    res.status(503).json({ error: 'PSO service is currently unavailable.', details: err.message });
+    res.status(503).json({ error: 'PSO service is currently unavailable.' });
   }
 });
 
