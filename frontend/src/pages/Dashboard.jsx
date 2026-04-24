@@ -121,13 +121,6 @@ const Dashboard = () => {
         return newArr.length > 8 ? newArr.slice(newArr.length - 8) : newArr;
       });
 
-      setStaffData(prev => prev.map(s => {
-        let avail = s.available + (Math.random() > 0.5 ? 1 : -1);
-        if (avail > s.total) avail = s.total;
-        if (avail < 2) avail = 2; 
-        return { ...s, available: avail };
-      }));
-
       setActivities(prev => {
         const now = new Date();
         const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
@@ -137,6 +130,43 @@ const Dashboard = () => {
     }, 60000);
 
     return () => { clearInterval(interval30s); clearInterval(interval60s); };
+  }, []);
+
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const response = await fetch('/api/employees');
+        const data = await response.json();
+        
+        let doctors = 0, availableDoctors = 0;
+        let nurses = 0, availableNurses = 0;
+        let paramedics = 0, availableParamedics = 0;
+
+        data.forEach(emp => {
+          // Exclude admins from the chart mapping if they exist
+          if (emp.role === 'Doctor') {
+            doctors++;
+            if (!emp.onLeave) availableDoctors++;
+          } else if (emp.role === 'Nurse') {
+            nurses++;
+            if (!emp.onLeave) availableNurses++;
+          } else if (emp.role === 'Paramedic') {
+            paramedics++;
+            if (!emp.onLeave) availableParamedics++;
+          }
+        });
+
+        setStaffData([
+          { name: 'Doctors', available: availableDoctors, total: doctors },
+          { name: 'Nurses', available: availableNurses, total: nurses },
+          { name: 'Paramedics', available: availableParamedics, total: paramedics }
+        ]);
+      } catch (error) {
+        console.error('Failed to fetch employees', error);
+      }
+    };
+    
+    fetchEmployees();
   }, []);
 
   // Handlers

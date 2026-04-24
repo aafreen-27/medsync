@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from pso import run_pso_optimization
 import json
@@ -17,9 +17,10 @@ def optimize_schedule():
     Expects data such as staff vectors, workload parameters.
     '''
     try:
-        # Mocking input data for algorithm
-        num_staff = 50
-        num_shifts = 3
+        data = request.get_json() or {}
+        num_staff = data.get('num_staff', data.get('num_employees', 50))
+        num_shifts = data.get('num_shifts', 3)
+        
         # Run optimization
         optimal_schedule = run_pso_optimization(num_staff, num_shifts)
         

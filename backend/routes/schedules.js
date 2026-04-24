@@ -17,14 +17,31 @@ router.get('/', async (req, res) => {
 // POST generate schedule dummy endpoint for PSO trigger
 router.post('/generate', async (req, res) => {
   try {
-    // In a real scenario, this would call the Python PSO microservice
-    // For now, we return a mock success
-    // Example: fetch('http://localhost:5001/optimize-schedule')
-    
-    // Marking active mock schedules
-    res.json({ message: 'Optimal schedule generated successfully using AI rules.', schedules: [] });
+    const employees = await Employee.find();
+    const numEmployees = employees.length || 0;
+
+    const response = await fetch('http://localhost:5001/optimize-schedule', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        num_employees: numEmployees,
+        num_shifts: 3
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`PSO service responded with status ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    res.json({
+      message: 'Optimal schedule generated successfully using AI rules.',
+      schedules: data.data || []
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Error generating schedule:', err);
+    res.status(503).json({ error: 'PSO service is currently unavailable.', details: err.message });
   }
 });
 
