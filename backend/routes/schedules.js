@@ -17,7 +17,8 @@ router.get('/', async (req, res) => {
 // POST generate schedule dummy endpoint for PSO trigger
 router.post('/generate', async (req, res) => {
   try {
-    const response = await fetch('http://127.0.0.1:5001/optimize-schedule', {
+    const psoUrl = process.env.PSO_SERVICE_URL || 'http://127.0.0.1:5001';
+    const response = await fetch(`${psoUrl}/optimize-schedule`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
