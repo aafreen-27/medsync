@@ -11,7 +11,7 @@ def fitness_function(position):
     patients_per_staff = position
     return np.sum(np.abs(patients_per_staff - 1.5))
 
-def run_pso_optimization(num_staff, num_shifts, iterations=50, num_particles=30):
+def run_pso_optimization(num_staff, num_shifts, iterations=30, num_particles=30):
     '''
     Run Particle Swarm Optimization for shift scheduling.
     '''

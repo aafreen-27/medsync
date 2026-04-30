@@ -232,9 +232,13 @@ const ShiftScheduler = () => {
     setPsoResult(null);
 
     try {
-      const response = await fetch('/api/schedules/generate', {
+      const response = await fetch('https://aafy2827-medsync-pso.hf.space/optimize-schedule', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          num_staff: 12,
+          num_shifts: 3
+        })
       });
 
       const data = await response.json();
